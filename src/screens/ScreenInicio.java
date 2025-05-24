@@ -14,15 +14,15 @@ import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
 import javax.swing.ListSelectionModel;
-import javax.swing.JScrollBar;
+import javax.swing.border.EmptyBorder;
 
 public class ScreenInicio extends JFrame {
 
@@ -30,9 +30,7 @@ public class ScreenInicio extends JFrame {
 	private JPanel contentPane;
 	private static ArrayList<String> tarefas = new ArrayList<>();
 	private static DefaultListModel<String> modelTarefas = new DefaultListModel<>();
-	private JTextField tfAddtarefa;
-	private JTextField txEditarTarefa;
-	private int itemSelecionado;
+	private static int itemSelecionado;
 
 	/**
 	 * Launch the application.
@@ -97,6 +95,22 @@ public class ScreenInicio extends JFrame {
 		
 		converterListModel();
 	}
+	
+	
+	
+	public static void atualizarStatus(Boolean chkStatus) {
+		String tarefa = tarefas.get(itemSelecionado);
+		String[] partes = tarefa.split(",");
+		
+		if(chkStatus == true) {
+			tarefas.set(itemSelecionado, partes[0]+ ",Concluido");
+			converterListModel();
+		}else {
+			tarefas.set(itemSelecionado, partes[0]+ ",Pendente");
+			converterListModel();
+		}
+	}
+		
 	/**
 	 * Create the frame.
 	 */
@@ -120,16 +134,14 @@ public class ScreenInicio extends JFrame {
 		lblTitle.setBounds(28, 11, 379, 49);
 		contentPane.add(lblTitle);
 		
-		for (String tarefa : tarefas) {
-	        modelTarefas.addElement(tarefa);
-	    }
-		
 		JList<String> listTarefas = new JList<>(modelTarefas);
 		listTarefas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		listTarefas.setForeground(new Color(0, 0, 0));
 		listTarefas.setFont(new Font("Courier New", Font.PLAIN, 14));
 		listTarefas.setBounds(29, 137, 396, 368);
 		contentPane.add(listTarefas);
+		
+		
 		
 		JLabel lblNewLabel = new JLabel("Tarefas");
 		lblNewLabel.setFont(new Font("Segoe UI Black", Font.PLAIN, 20));
@@ -141,7 +153,7 @@ public class ScreenInicio extends JFrame {
 		lblAdicionarTarefa.setBounds(489, 137, 232, 28);
 		contentPane.add(lblAdicionarTarefa);
 		
-		tfAddtarefa = new JTextField();
+		JTextField tfAddtarefa = new JTextField();
 		tfAddtarefa.setBounds(487, 176, 232, 39);
 		contentPane.add(tfAddtarefa);
 		tfAddtarefa.setColumns(10);
@@ -154,6 +166,7 @@ public class ScreenInicio extends JFrame {
 				}else{
 					tarefas.add(tfAddtarefa.getText() + ",Pendente");
 					converterListModel();
+					tfAddtarefa.setText("");
 				}
 			}
 		});
@@ -167,7 +180,7 @@ public class ScreenInicio extends JFrame {
 		        if (ItemSelecionado != -1 ) {	  
 		            tarefas.remove(ItemSelecionado);
 		            converterListModel();
-		        } else {
+		        }else {
 		            JOptionPane.showMessageDialog(null, "Selecione uma tarefa para remover.");
 		        }
 		    
@@ -181,7 +194,7 @@ public class ScreenInicio extends JFrame {
 		lblEditarTarefa.setBounds(490, 298, 232, 28);
 		contentPane.add(lblEditarTarefa);
 		
-		txEditarTarefa = new JTextField();
+		JTextField txEditarTarefa = new JTextField();
 		txEditarTarefa.setColumns(10);
 		txEditarTarefa.setBounds(488, 337, 232, 39);
 		contentPane.add(txEditarTarefa);
@@ -200,11 +213,17 @@ public class ScreenInicio extends JFrame {
 		btnEditarTarefa.setBounds(730, 338, 154, 38);
 		contentPane.add(btnEditarTarefa);
 		
+		JCheckBox chckbxStatus = new JCheckBox("Feito?");
+		chckbxStatus.setFont(new Font("Segoe UI Black", Font.PLAIN, 15));
+        chckbxStatus.setBackground(new Color(119, 207, 255));
+        chckbxStatus.setBounds(489, 470, 85, 35);
+        contentPane.add(chckbxStatus);
+		
 		JButton btnSalvar = new JButton("Salvar");
 		btnSalvar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				 try {
-			            escreverDados();
+			          	escreverDados();
 			            JOptionPane.showMessageDialog(null, "Tarefas salvas com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
 			        } catch (Exception ex) {
 			            JOptionPane.showMessageDialog(null, "Erro ao salvar tarefas: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -214,6 +233,37 @@ public class ScreenInicio extends JFrame {
         btnSalvar.setBounds(205, 526, 97, 38);
         contentPane.add(btnSalvar);
         
+        listTarefas.addListSelectionListener(e -> { 
+	        itemSelecionado = listTarefas.getSelectedIndex();
+	        if (itemSelecionado != -1) {
+	            String[] partes = tarefas.get(itemSelecionado).split(",");
+	            txEditarTarefa.setText(partes[0]);
+	            
+	            if(partes[1].equals("Pendente")) {
+	            	chckbxStatus.setSelected(false);
+	            }else {
+	            	chckbxStatus.setSelected(true);
+	            }
+	            
+	            
+	        }else {
+	        	txEditarTarefa.setText("");
+	        }
+	        
+        });
+        
+        
+        chckbxStatus.addActionListener(e -> {
+        	if(itemSelecionado < 0) {
+        		atualizarStatus(chckbxStatus.isSelected());
+        	}else {
+        		chckbxStatus.setSelected(false);
+        	}
+            
+        });
+        
+        
+        
         JButton btnCarregar = new JButton("Carregar");
         btnCarregar.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
@@ -222,18 +272,13 @@ public class ScreenInicio extends JFrame {
         });
         btnCarregar.setBounds(312, 526, 113, 38);
         contentPane.add(btnCarregar);
-		
-		listTarefas.addListSelectionListener(e -> { 
-		        itemSelecionado = listTarefas.getSelectedIndex();
-		        if (itemSelecionado != -1) {
-		            String[] partes = tarefas.get(itemSelecionado).split(",");
-		            txEditarTarefa.setText(partes[0]);
-		        }
-
-		});
-		
-		
-		
+        
+       
+        
+        JLabel lblStatusDaTarefa = new JLabel("Status da tarefa");
+        lblStatusDaTarefa.setFont(new Font("Segoe UI Black", Font.PLAIN, 20));
+        lblStatusDaTarefa.setBounds(489, 435, 232, 28);
+        contentPane.add(lblStatusDaTarefa);
 		
 	}
 }
