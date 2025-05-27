@@ -7,13 +7,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -54,7 +54,15 @@ public class ScreenInicio extends JFrame {
 	
 //	função para salvar os dados no arquivo csv
 	public void  escreverDados() {
-		String path = "src/dados/tarefas.csv";
+		
+//	     cria uma pasta na area de trabalho para tornar o arquivo portavel
+		 File dadosListaDeTarefas = new File("dadosListaDeTarefas");
+//		verifica se a pasta existe e se não  utiliza o metodo mkdirs da classe File para criar a pasta
+		    if (!dadosListaDeTarefas.exists()) {
+		    	dadosListaDeTarefas.mkdirs();
+		    }
+
+		    String path = "dadosListaDeTarefas/tarefas.csv";
 
 		
 		try(BufferedWriter bw = new BufferedWriter(new FileWriter(path))){
@@ -81,7 +89,7 @@ public class ScreenInicio extends JFrame {
 	
 //	funcção para Carregar os dados do arquivo fonte CSV
 	public static void carregarDados() {
-		String path = "src/dados/tarefas.csv";
+		String path = "dadosListaDeTarefas/tarefas.csv";
 		
 //		limpa o array e o DefaltList Atual
 		modelTarefas.clear();
@@ -144,15 +152,9 @@ public class ScreenInicio extends JFrame {
 		listTarefas.setBounds(29, 137, 396, 368);
 		contentPane.add(listTarefas);
 		
-		JLabel lblImg = new JLabel("");
-    	lblImg.setBounds(29, 11, 59, 64);
-    	contentPane.add(lblImg);
-    	ImageIcon imagem = new ImageIcon("imagens/logo.png");
-    	lblImg.setIcon(imagem);
-		
 		JLabel lblTitle = new JLabel("Lista de Tarefas");
 		lblTitle.setFont(new Font("Segoe UI Black", Font.PLAIN, 40));
-		lblTitle.setBounds(98, 11, 379, 49);
+		lblTitle.setBounds(29, 11, 379, 49);
 		contentPane.add(lblTitle);
 		
 		JLabel lblNewLabel = new JLabel("Tarefas");
@@ -300,6 +302,8 @@ public class ScreenInicio extends JFrame {
         chckbxStatus.addActionListener(e -> {
             if(itemSelecionado < 0) {
             	chckbxStatus.setSelected(false);
+            	
+            	
             	
             } else {
                 atualizarStatus(chckbxStatus.isSelected());
